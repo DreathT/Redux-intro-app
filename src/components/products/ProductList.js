@@ -13,7 +13,7 @@ class ProductList extends Component {
 
   addToCart = (product) => {
     this.props.actions.addToCart({ quantity: 1, product });
-    alertify.success(product.productName + " Sepete Eklendi");
+    alertify.success(product.productName + " add to cart");
   };
 
   render() {
