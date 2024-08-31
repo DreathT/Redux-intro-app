@@ -1,22 +1,22 @@
-import React, { Component } from 'react'
-import {Row, Col} from "reactstrap"
-import CategoryList from '../categories/CategoryList'
+import React from 'react'
+import { Row, Col } from "reactstrap"
 import ProductList from '../products/ProductList'
- 
-export default class Dashboard extends Component {
-  render() {
-    return (
-      <div>
-        <Row>
-            <Col xs="3">
-                <CategoryList></CategoryList>
-            </Col>
-            <Col xs="9">
-                <ProductList></ProductList>
-            </Col>
-        </Row>
-        
-      </div>
-    )
-  }
+import CategoryList from '../categories/CategoryList'
+
+function Dashboard() {
+
+  return (
+    <div>
+      <Row>
+        <Col xs="3">
+          <CategoryList />
+        </Col>
+        <Col xs="9">
+          <ProductList />
+        </Col>
+      </Row>
+
+    </div>
+  )
 }
+export default Dashboard

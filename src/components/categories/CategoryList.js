@@ -1,63 +1,49 @@
-import React, { Component } from "react";
-import { connect } from "react-redux";
-import { bindActionCreators } from "redux";
-import * as categoryActions from "../../redux/actions/categoryActions";
-import * as productActions from "../../redux/actions/productActions";
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { ListGroup, ListGroupItem, Badge } from "reactstrap";
+import { getAllCategoriesAction } from "../../redux/category/getAllCategories";
+import { changeCategoryAction } from "../../redux/category/changeCategory";
+import { getProductsAction } from "../../redux/product/getProducts";
 
-class CategoryList extends Component {
-  componentDidMount() {
-    this.props.actions.getCategories();
-  }
 
-  selectCategory = (category) => {
-    this.props.actions.changeCategory(category);
-    this.props.actions.getProducts(category.id);
-  };
 
-  render() {
+function CategoryList() {
+
+    const dispatch = useDispatch()
+    const { categories } = useSelector((state) => state.getAllCategories)
+    const { currentCategory } = useSelector((state) => state.changeCategory)
+    const [selectedCategory, setSelectedCategory] = useState()
+
+    useEffect(() => {
+        dispatch(getAllCategoriesAction())
+    }, [])
+
+    useEffect(() => {
+        if (selectedCategory) {
+            dispatch(getProductsAction(selectedCategory.id));
+            dispatch(changeCategoryAction(selectedCategory));
+        }
+    }, [selectedCategory])
+
     return (
-      <div>
-        <h3>
-          <Badge color="warning">categories</Badge>
-        </h3>
-        <ListGroup>
-          {this.props.categories.map((category) => (
-            <ListGroupItem
-              active={category.id === this.props.currentCategory.id}
-              onClick={() => this.selectCategory(category)}
-              key={category.id}
-            >
-              {category.categoryName}
-            </ListGroupItem>
-          ))}
-        </ListGroup>
-      </div>
+        <div>
+            <h3>
+                <Badge color="warning">categories</Badge>
+            </h3>
+            <ListGroup>
+                {categories.map((category) => (
+                    <ListGroupItem
+                        active={category.id === currentCategory.id}
+                        onClick={() => setSelectedCategory(category)}
+                        key={category.id}
+                    >
+                        {category.categoryName}
+                    </ListGroupItem>
+                ))}
+            </ListGroup>
+        </div>
     );
-  }
 }
 
-function mapStateToProps(state) {
-  return {
-    currentCategory: state.changeCategoryReducer,
-    categories: state.categoryListReducer,
-  };
-}
-
-function mapDispatchToProps(dispatch) {
-  return {
-    actions: {
-      getCategories: bindActionCreators(
-        categoryActions.getCategories,
-        dispatch
-      ),
-      changeCategory: bindActionCreators(
-        categoryActions.changeCategory,
-        dispatch
-      ),
-      getProducts: bindActionCreators(productActions.getProducts, dispatch),
-    },
-  };
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(CategoryList);
+export default CategoryList

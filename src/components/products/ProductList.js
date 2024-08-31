@@ -1,80 +1,63 @@
-import React, { Component } from "react";
-import { connect } from "react-redux";
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Badge, Table, Button } from "reactstrap";
-import * as productActions from "../../redux/actions/productActions";
-import * as cartActions from "../../redux/actions/cartActions";
-import { bindActionCreators } from "redux";
-import alertify from "alertifyjs";
+import { Link } from "react-router-dom";
+import { getProductsAction } from "../../redux/product/getProducts";
+import { addToCartAction } from "../../redux/cart/addToCart";
 
-class ProductList extends Component {
-  componentDidMount() {
-    this.props.actions.getProducts();
-  }
+function ProductList() {
 
-  addToCart = (product) => {
-    this.props.actions.addToCart({ quantity: 1, product });
-    alertify.success(product.productName + " add to cart");
-  };
+  const dispatch = useDispatch()
+  const { products } = useSelector((state) => state.getProducts)
+  const { currentCategory } = useSelector((state) => state.changeCategory)
 
-  render() {
-    return (
-      <div>
-        <h3>
-          <Badge color="warning">Products</Badge>
-          -_-
-          <Badge color="success">
-            {this.props.currentCategory.categoryName}
-          </Badge>
-        </h3>
-        <Table hover>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Product Name</th>
-              <th>Unit Price</th>
-              <th>Quantity Per Unit</th>
-              <th>Units In Stock</th>
+  useEffect(() => {
+    dispatch(getProductsAction())
+  }, [])
+
+
+  return (
+    <div>
+      <h3>
+        <Badge color="warning">Products</Badge>
+        -_-
+        <Badge color="success">
+          {currentCategory.categoryName}
+        </Badge>
+      </h3>
+      <Table hover>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Product Name</th>
+            <th>Unit Price</th>
+            <th>Quantity Per Unit</th>
+            <th>Units In Stock</th>
+          </tr>
+        </thead>
+        <tbody>
+          {products.map(product => (
+            <tr key={product.id}>
+              <th scope="row">{product.id}</th>
+              <td><Link to={"/saveproduct/" + product.id}>{product.productName}</Link></td>
+              <td>{product.unitPrice}</td>
+              <td>{product.quantityPerUnit}</td>
+              <td>{product.unitsInStock}</td>
+              <td>
+                <Button
+                  color="success"
+                  onClick={() => dispatch(addToCartAction(product))}
+                >
+                  Add
+                </Button>
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {this.props.products.map((product) => (
-              <tr key={product.id}>
-                <th scope="row">{product.id}</th>
-                <td>{product.productName}</td>
-                <td>{product.unitPrice}</td>
-                <td>{product.quantityPerUnit}</td>
-                <td>{product.unitsInStock}</td>
-                <td>
-                  <Button
-                    color="success"
-                    onClick={() => this.addToCart(product)}
-                  >
-                    Add
-                  </Button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
-      </div>
-    );
-  }
+          ))}
+        </tbody>
+      </Table>
+    </div>
+  );
 }
 
-function mapStateToProps(state) {
-  return {
-    currentCategory: state.changeCategoryReducer,
-    products: state.productListReducer,
-  };
-}
-
-function mapDispatchToProps(dispatch) {
-  return {
-    actions: {
-      getProducts: bindActionCreators(productActions.getProducts, dispatch),
-      addToCart: bindActionCreators(cartActions.addToCart, dispatch),
-    },
-  };
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(ProductList);
+export default ProductList;
