@@ -14,29 +14,8 @@ const addToCartAction = createAsyncThunk("ADD_TO_CART_ACTION", async (
 
     , { rejectWithValue }) => {
     console.log("addToCart product parametre: ", product)
-    console.log("addToCart product.id parametre: ", product.id)
     try {
-        console.log("initialState.cart: ", initialState.cart)
-        let addedItem = initialState.cart && initialState.cart.find(
-            (item) => item.id === product.id
-        );
-        console.log("!!addedItem: ", !!addedItem)
-        if (!!addedItem) { // !! this operator convert value to boolean (true/false)
-            let newCart = initialState.cart.map((item) => {
-                if (item.product.id === product.id) {
-                    return Object.assign({}, addedItem, {
-                        quantity: addedItem.quantity + 1,
-                    });
-                }
-                console.log("item: ", item)
-                return item;
-            });
-            console.log("newCart: ", newCart)
-            return newCart;
-        } else {
-            return [...initialState.cart, { ...product }];
-        }
-
+        return product;
     } catch (error) {
         return rejectWithValue(error)
     }
@@ -51,13 +30,24 @@ export const addToCartSlice = createSlice({
     extraReducers: (builder) => {
         builder.addCase(addToCartAction.pending, (state) => {
             state.loading = true;
-            state.cart = [];
         })
         builder.addCase(addToCartAction.fulfilled, (state, action) => {
-            console.log("action payload fullFilled", action.payload)
             state.loading = false;
-            state.cart = action.payload;
-            console.log("fullfilled state.cart", state.cart)
+
+            const indexOfField = state.cart.findIndex(item => item.id === action.payload.id)
+
+            if (indexOfField > -1) {
+
+                if (state.cart[indexOfField].quantity && state.cart[indexOfField].quantity > 0) {
+                    state.cart[indexOfField].quantity += 1
+                } else {
+                    state.cart[indexOfField] = Object.assign(state.cart[indexOfField], { quantity: 2 })
+                }
+
+            } else {
+                state.cart.push(action.payload)
+            }
+
         })
         builder.addCase(addToCartAction.rejected, (state, action) => {
             state.loading = false;
@@ -65,7 +55,6 @@ export const addToCartSlice = createSlice({
         })
     }
 })
-
 export { addToCartAction };
 export const { } = addToCartSlice.actions
 export default addToCartSlice.reducer
